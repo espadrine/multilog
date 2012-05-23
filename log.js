@@ -46,7 +46,7 @@ log.allto = function (parentTag, tag) {
 };
 
 // Print a single statement on several tags.
-log.logTags = function (tagList, statement, alreadyPrinted) {
+log.tags = function (tagList, statement, alreadyPrinted) {
 
   // List of all tags that have already been used for that statement.
   var alreadyPrinted = {};

@@ -19,12 +19,12 @@ You get the following functions:
 - `log.output = {}` is a map from tags to writable streams.
 - `log.allto(parentTag, tag)` makes all `parentTag` statements be on the `tag`
   channel.
-- `log.logTags(tagList, statement)` prints `statement` on multiple tags.
+- `log.tags(tagList, statement)` prints `statement` on multiple tags.
 
 
 ## Authorship
 
-Thaddee Tyl © 2012 released under CC-BY-SA.
+Thaddee Tyl © 2012 released under
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img
 alt="Creative Commons License" style="border-width:0"
-src="http://i.creativecommons.org/l/by-sa/3.0/80x15.png" /></a>
+src="http://i.creativecommons.org/l/by-sa/3.0/80x15.png" /></a>.

@@ -30,7 +30,7 @@ statements to the corresponding pipeline. All other tags are readable:
 
 ## Authorship
 
-Thaddee Tyl © 2012 released under
+Thaddee Tyl © 2012-2013 released under
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img
 alt="Creative Commons License" style="border-width:0"
 src="http://i.creativecommons.org/l/by-sa/3.0/80x15.png" /></a>.

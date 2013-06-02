@@ -17,9 +17,15 @@ You get the following functions:
 
 - `log(tag, statement)` function prints `statement` in `tag` channel.
 - `log.output = {}` is a map from tags to writable streams.
-- `log.allto(parentTag, tag)` makes all `parentTag` statements be on the `tag`
+- `log.pipe(parentTag, tag)` makes all `parentTag` statements be on the `tag`
   channel.
 - `log.tags(tagList, statement)` prints `statement` on multiple tags.
+
+There are two special tags, `stdout` and `stderr`, which directly flush their
+statements to the corresponding pipeline. All other tags are readable:
+
+    log('myTag', 'I have something to say');
+    log.output.myTag.read()     // 'I have something to say\n'
 
 
 ## Authorship

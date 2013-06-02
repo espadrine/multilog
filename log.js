@@ -1,4 +1,5 @@
 module.exports = log;
+var stream = require('stream');
 
 // You affect a list of tags to each logged statement.
 
@@ -13,12 +14,16 @@ function log(tag, statement, alreadyPrinted) {
         log.output[tag].write(statement + '\n');
       } catch(e) {}
       alreadyPrinted[tag] = true;
-    }
 
-    if (log.children[tag]) {
+    } else if (log.children[tag]) {
       for (var i = 0; i < log.children[tag].length; i++) {
         log(log.children[tag][i], statement, alreadyPrinted);
       }
+
+    } else {
+      // The tag is unlisted. Create an output for it.
+      newOutput(tag);
+      log(tag, statement, alreadyPrinted);
     }
   }
 }
@@ -29,6 +34,23 @@ log.output = {
   'stderr': process.stderr,
 };
 
+// Create a new output in the list of tags.
+function newOutput(tag) {
+  var logStream = new stream.Duplex({
+    allowHalfOpen: false,
+    decodeStrings: false,
+    encoding: 'utf-8',
+    highWaterMark: 0,
+  });
+  var logBuf = '';
+  logStream._read = function(size) { logStream.push(logBuf); };
+  logStream._write = function(chunk, encoding, callback) {
+    logBuf += '' + chunk;
+    callback(null);
+  };
+  log.output[tag] = logStream;
+}
+
 // Tag parenting.
 //
 // Every statement that is printed in a tag is also printed in
@@ -37,10 +59,10 @@ log.output = {
 //     log.children['major'] = ['critical'];
 log.children = {};
 
-//     log.allto('critical', 'major');
+//     log.pipe('critical', 'major');
 //
-//  should be read "log all critical statements to major".
-log.allto = function (parentTag, tag) {
+//  should be read "pipe all critical statements to major".
+log.pipe = function (parentTag, tag) {
   log.children[parentTag] = log.children[parentTag] || [];
   log.children[parentTag].push(tag);
 };

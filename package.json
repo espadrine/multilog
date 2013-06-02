@@ -1,0 +1,25 @@
+{
+  "name": "multilog",
+  "description": "Tagged logging. Includes multi-streamed logging and filtering.",
+  "author": "Thaddee Tyl <thaddee.tyl@gmail.com> (http://espadrine.github.com/)",
+  "contributors": [
+    "Thaddee Tyl <thaddee.tyl@gmail.com>"
+  ],
+  "main": "log.js",
+  "version": "13.06.01",
+  "homepage": "http://espadrine.github.com/multilog/",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/espadrine/multilog.git"
+  },
+  "scripts": {
+    "test": "node test.js"
+  },
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "readmeFilename": "Readme.md"
+}

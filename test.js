@@ -1,14 +1,20 @@
 // Example of use.
 var log = require('./log');
+var assert = require('assert');
 
-// Specify two compartments, log and pipe.
-log.pipe('log', 'stdout');
-log.pipe('pipe', 'stdout');
+// Assume three compartments: checkpoint, assert and bug.
+// bug → stdout
+// checkpoint → assert
+// bug → assert
+log.pipe('bug', 'stdout');
+log.pipe('checkpoint', 'assert');
+log.pipe('bug', 'assert');
 
-log('log', "Trying a log");
-log('pipe', "Testing pipe");
+var bugMsg = "This message is sent to bug.";
+log('bug', bugMsg);
+assert.equal(log.read('assert'), bugMsg + '\n', "Bug did not pipe to assert");
 
-// Specify a subcompartment.
-log.pipe('parenting', 'pipe');
-
-log('parenting', "Testing parenting");
+var checkpointMsg = "This message is sent to bug.";
+log('checkpoint', checkpointMsg);
+assert.equal(log.read('assert'), bugMsg + '\n' + checkpointMsg + '\n',
+    "checkpoint did not pipe to assert");

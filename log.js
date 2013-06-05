@@ -34,34 +34,91 @@ log.output = {
   'stderr': process.stderr,
 };
 
+// Contains all the logs of readable outputs.
+// List of instances of Msg.
+var logBuf = [];
+
+function Msg(tag, msg) {
+  this.stamp = +new Date();
+  this.tag = tag;
+  this.msg = msg;
+}
+
+function logMsg(tag, msg) {
+  logBuf.push(new Msg(tag, msg));
+}
+function readOutput(tag) {
+  var output = '';
+  for (var i = 0; i < logBuf.length; i++) {
+    if (logBuf[i].tag === tag) {
+      output += logBuf[i].msg;
+    }
+  }
+  return output;
+}
+
 // Create a new output in the list of tags.
 function newOutput(tag) {
+  // FIXME: is it still necessary, given log.read(), to be readable?
   var logStream = new stream.Duplex({
     allowHalfOpen: false,
     decodeStrings: false,
     encoding: 'utf-8',
     highWaterMark: 0,
   });
-  var logBuf = '';
-  logStream._read = function(size) { logStream.push(logBuf); };
+  logStream._read = function(size) { logStream.push(readOutput(tag)); };
   logStream._write = function(chunk, encoding, callback) {
-    logBuf += '' + chunk;
+    logMsg(tag, '' + chunk);
     callback(null);
   };
   log.output[tag] = logStream;
 }
+
+// Read all data from a tag.
+log.read = function(tag) {
+  // Unline readOutput, any tag can be specified.
+  var set = family(tag);
+  var output = '';
+  for (var i = 0; i < logBuf.length; i++) {
+    // If the log's tag belongs to the family…
+    if (!!set[logBuf[i].tag]) {
+      output += logBuf[i].msg;
+    }
+  }
+  return output;
+};
+
+// FIXME: implement log.flush().
+// Remove data associated with a tag.
 
 // Tag parenting.
 //
 // Every statement that is printed in a tag is also printed in
 // all of its children.
 //
-//     log.children['major'] = ['critical'];
+//     log.children['critical'] = ['major'];
 log.children = {};
+
+//     family('critical')   // {'major': true}
+//
+// Return a list of children and their own families.
+function family(tag, alreadyRead) {
+  var set = alreadyRead || Object.create(null);
+  set[tag] = true;
+  if (log.children[tag] !== undefined) {
+    for (var i = 0; i < log.children[tag].length; i++) {
+      // if that child hasn't already been visited…
+      if (!set[log.children[tag][i]]) {
+        family(log.children[tag][i], set);
+      }
+    }
+  }
+  return set;
+}
 
 //     log.pipe('critical', 'major');
 //
-//  should be read "pipe all critical statements to major".
+// …should be read "pipe all critical statements to major".
 log.pipe = function (parentTag, tag) {
   log.children[parentTag] = log.children[parentTag] || [];
   log.children[parentTag].push(tag);

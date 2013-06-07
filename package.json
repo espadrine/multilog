@@ -6,7 +6,7 @@
     "Thaddee Tyl <thaddee.tyl@gmail.com>"
   ],
   "main": "log.js",
-  "version": "13.06.01",
+  "version": "13.06.07",
   "homepage": "http://espadrine.github.com/multilog/",
   "repository": {
     "type": "git",

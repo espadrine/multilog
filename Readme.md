@@ -20,6 +20,7 @@ You get the following functions:
 - `log.pipe(parentTag, tag)` makes all `parentTag` statements be on the `tag`
   channel.
 - `log.tags(tagList, statement)` prints `statement` on multiple tags.
+- `log.flush(tag)` clears all data stored in `tag` and its children.
 
 There are two special tags, `stdout` and `stderr`, which directly flush their
 statements to the corresponding pipeline. All other tags are readable:

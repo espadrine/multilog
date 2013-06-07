@@ -88,8 +88,20 @@ log.read = function(tag) {
   return output;
 };
 
-// FIXME: implement log.flush().
 // Remove data associated with a tag.
+log.flush = function(tag) {
+  // Unline readOutput, any tag can be specified.
+  var set = family(tag);
+  var newBuf = [];
+  for (var i = 0; i < logBuf.length; i++) {
+    // If the log's tag belongs to the family…
+    if (!set[logBuf[i].tag]) {
+      newBuf.push(logBuf[i]);
+    }
+  }
+  logBuf = newBuf;
+};
+
 
 // Tag parenting.
 //

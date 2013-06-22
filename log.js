@@ -34,6 +34,14 @@ log.output = {
   'stderr': process.stderr,
 };
 
+log.leafTags = function() {
+  var tags = [];
+  for (var tag in log.output) {
+    if (tag !== 'stdout' && tag !== 'stderr') { tags.push(tag); }
+  }
+  return tags;
+};
+
 // Contains all the logs of readable outputs.
 // List of instances of Msg.
 var logBuf = [];

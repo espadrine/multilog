@@ -26,3 +26,6 @@ assert.equal(log.read('assert'), nl([bugMsg, checkpointMsg]),
 log.flush('bug');
 assert.equal(log.read('assert'), '', "Bug did not flush");
 assert.equal(log.read('checkpoint'), '', "Bug did not flush parent");
+
+// Test the leafTags.
+assert.equal(log.leafTags()[0], 'assert', "Leaf tags are detected.");

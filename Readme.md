@@ -11,7 +11,9 @@ child tag are printed to the parent tag's writable stream!
 
 ## API
 
+```javascript
     var log = require('multilog');
+```
 
 You get the following functions:
 
@@ -25,8 +27,10 @@ You get the following functions:
 There are two special tags, `stdout` and `stderr`, which directly flush their
 statements to the corresponding pipeline. All other tags are readable:
 
+```javascript
     log('myTag', 'I have something to say');
     log.read('myTag')     // 'I have something to say\n'
+```
 
 
 ## Authorship

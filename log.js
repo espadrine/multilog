@@ -9,9 +9,9 @@ function log(tag, statement, alreadyPrinted) {
   alreadyPrinted = alreadyPrinted || {};
 
   if (alreadyPrinted[tag] === undefined) {
-    if (log.output[tag]) {
+    if (logOutput[tag]) {
       try {
-        log.output[tag].write(statement + '\n');
+        logOutput[tag].write(statement + '\n');
       } catch(e) {}
       alreadyPrinted[tag] = true;
 
@@ -29,14 +29,14 @@ function log(tag, statement, alreadyPrinted) {
 }
 
 // Each tag goes to a certain writer.
-log.output = {
+var logOutput = {
   'stdout': process.stdout,
   'stderr': process.stderr,
 };
 
 log.leafTags = function() {
   var tags = [];
-  for (var tag in log.output) {
+  for (var tag in logOutput) {
     if (tag !== 'stdout' && tag !== 'stderr') { tags.push(tag); }
   }
   return tags;
@@ -79,7 +79,7 @@ function newOutput(tag) {
     logMsg(tag, '' + chunk);
     callback(null);
   };
-  log.output[tag] = logStream;
+  logOutput[tag] = logStream;
 }
 
 // Read all data from a tag.
@@ -151,7 +151,7 @@ log.tags = function (tagList, statement, alreadyPrinted) {
   var alreadyPrinted = {};
 
   for (var i = 0; i < tagList.length; i++) {
-    if (log.output[tagList[i]] && alreadyPrinted[tagList[i]] === undefined) {
+    if (logOutput[tagList[i]] && alreadyPrinted[tagList[i]] === undefined) {
       log.write(tagList[i], statement, alreadyPrinted);
     }
   }

@@ -3,7 +3,8 @@ var stream = require('stream');
 
 // You affect a list of tags to each logged statement.
 
-function log(tag, statement, alreadyPrinted) {
+function log(statement, tag, alreadyPrinted) {
+  tag = tag || 'stdout';
 
   // List of all tags that have already been used for that statement.
   alreadyPrinted = alreadyPrinted || {};
@@ -17,13 +18,13 @@ function log(tag, statement, alreadyPrinted) {
 
     } else if (log.children[tag]) {
       for (var i = 0; i < log.children[tag].length; i++) {
-        log(log.children[tag][i], statement, alreadyPrinted);
+        log(statement, log.children[tag][i], alreadyPrinted);
       }
 
     } else {
       // The tag is unlisted. Create an output for it.
       newOutput(tag);
-      log(tag, statement, alreadyPrinted);
+      log(statement, tag, alreadyPrinted);
     }
   }
 }
@@ -33,6 +34,8 @@ var logOutput = {
   'stdout': process.stdout,
   'stderr': process.stderr,
 };
+
+log.stream = function(tag) { return logOutput[tag]; };
 
 log.leafTags = function() {
   var tags = [];
@@ -145,7 +148,7 @@ log.pipe = function (parentTag, tag) {
 };
 
 // Print a single statement on several tags.
-log.tags = function (tagList, statement, alreadyPrinted) {
+log.tags = function (statement, tagList, alreadyPrinted) {
 
   // List of all tags that have already been used for that statement.
   var alreadyPrinted = {};

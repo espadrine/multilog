@@ -17,20 +17,25 @@ var log = require('multilog');
 
 You get the following functions:
 
-- `log(tag, statement)` function prints `statement` in `tag` channel.
+- `log(statement, tag)` function prints `statement` in `tag` channel
+  (defaulting to the special "stdout" channel).
 - `log.read(tag)` returns a string of all logs in that tag.
 - `log.pipe(parentTag, tag)` makes all `parentTag` statements be on the `tag`
   channel.
-- `log.tags(tagList, statement)` prints `statement` on multiple tags.
+
+Advanced use:
+
+- `log.tags(statement, tagList)` prints `statement` on multiple tags.
 - `log.flush(tag)` clears all data stored in `tag` and its children.
 - `log.leafTags()` gives a list of all non-piped (fundamental) buffered tags.
+- `log.stream(tag)` returns a Stream for a fundamental buffered tag.
 
 There are two special tags, `stdout` and `stderr`, which directly flush their
 statements to the corresponding pipeline. All other tags are readable:
 
 ```javascript
 log('myTag', 'I have something to say');
-log.read('myTag')     // 'I have something to say\n'
+log.read('myTag');  // 'I have something to say\n'
 ```
 
 

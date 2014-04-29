@@ -15,11 +15,11 @@ log.pipe('checkpoint', 'assert');
 log.pipe('bug', 'assert');
 
 var bugMsg = "This message is sent to bug.";
-log('bug', bugMsg);
+log(bugMsg, 'bug');
 assert.equal(log.read('assert'), nl([bugMsg]), "Bug did not pipe to assert");
 
 var checkpointMsg = "This message is sent to bug.";
-log('checkpoint', checkpointMsg);
+log(checkpointMsg, 'checkpoint');
 assert.equal(log.read('assert'), nl([bugMsg, checkpointMsg]),
     "checkpoint did not pipe to assert");
 

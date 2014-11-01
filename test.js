@@ -10,22 +10,21 @@ function nl(msgs) {
 // bug → stdout
 // bug → assert
 // checkpoint → assert
-log.pipe('bug', 'stdout');
+log.pipe('bug', process.stdout);
 log.pipe('checkpoint', 'assert');
 log.pipe('bug', 'assert');
+log.retain('assert');
+log.retain('checkpoint');
 
 var bugMsg = "This message is sent to bug.";
 log(bugMsg, 'bug');
 assert.equal(log.read('assert'), nl([bugMsg]), "Bug did not pipe to assert");
 
-var checkpointMsg = "This message is sent to bug.";
+var checkpointMsg = "This message is sent to checkpoint.";
 log(checkpointMsg, 'checkpoint');
 assert.equal(log.read('assert'), nl([bugMsg, checkpointMsg]),
     "checkpoint did not pipe to assert");
 
-log.flush('bug');
+log.flush('assert');
 assert.equal(log.read('assert'), '', "Bug did not flush");
 assert.equal(log.read('checkpoint'), '', "Bug did not flush parent");
-
-// Test the leafTags.
-assert.equal(log.leafTags()[0], 'assert', "Leaf tags are detected.");

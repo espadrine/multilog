@@ -14,17 +14,22 @@ function log(statement, tag, alreadyPrinted) {
       try {
         logOutput[tag].write(statement + '\n');
       } catch(e) {}
+    }
+    if (logRetained[tag]) {
+      try {
+        logRetained[tag].write(statement + '\n');
+      } catch(e) {}
       alreadyPrinted[tag] = true;
-
     } else if (log.children[tag]) {
       for (var i = 0; i < log.children[tag].length; i++) {
         log(statement, log.children[tag][i], alreadyPrinted);
       }
 
     } else {
-      // The tag is unlisted. Create an output for it.
-      newOutput(tag);
-      log(statement, tag, alreadyPrinted);
+      // The tag is unlisted. Discard the statement.
+      // The user could have created an output for it
+      // with `log.retain('RAM log')`.
+      // Then, they can read it: `log.read('RAM log')`.
     }
   }
 }
@@ -34,16 +39,9 @@ var logOutput = {
   'stdout': process.stdout,
   'stderr': process.stderr,
 };
+var logRetained = {};
 
-log.stream = function(tag) { return logOutput[tag]; };
-
-log.leafTags = function() {
-  var tags = [];
-  for (var tag in logOutput) {
-    if (tag !== 'stdout' && tag !== 'stderr') { tags.push(tag); }
-  }
-  return tags;
-};
+log.stream = function(tag) { return logRetained[tag]; };
 
 // Contains all the logs of readable outputs.
 // List of instances of Msg.
@@ -69,7 +67,7 @@ function readOutput(tag) {
 }
 
 // Create a new output in the list of tags.
-function newOutput(tag) {
+log.retain = function newOutput(tag) {
   // FIXME: is it still necessary, given log.read(), to be readable?
   var logStream = new stream.Duplex({
     allowHalfOpen: false,
@@ -82,16 +80,17 @@ function newOutput(tag) {
     logMsg(tag, '' + chunk);
     callback(null);
   };
-  logOutput[tag] = logStream;
+  logRetained[tag] = logStream;
+  return tag;
 }
 
 // Read all data from a tag.
 log.read = function(tag) {
   // Unline readOutput, any tag can be specified.
-  var set = family(tag);
+  var set = ancestry(tag);
   var output = '';
   for (var i = 0; i < logBuf.length; i++) {
-    // If the log's tag belongs to the family…
+    // If the log's tag belongs to the ancestry…
     if (!!set[logBuf[i].tag]) {
       output += logBuf[i].msg;
     }
@@ -102,10 +101,10 @@ log.read = function(tag) {
 // Remove data associated with a tag.
 log.flush = function(tag) {
   // Unline readOutput, any tag can be specified.
-  var set = family(tag);
+  var set = ancestry(tag);
   var newBuf = [];
   for (var i = 0; i < logBuf.length; i++) {
-    // If the log's tag belongs to the family…
+    // If the log's tag doesn't belong to the ancestry…
     if (!set[logBuf[i].tag]) {
       newBuf.push(logBuf[i]);
     }
@@ -120,9 +119,11 @@ log.flush = function(tag) {
 // all of its children.
 //
 //     log.children['critical'] = ['major'];
+//     log.parents['major'] = ['critical'];
 log.children = {};
+log.parents = {};
 
-//     family('critical')   // {'major': true}
+//     family('critical')   // {'critical': true, 'major': true}
 //
 // Return a list of children and their own families.
 function family(tag, alreadyRead) {
@@ -139,12 +140,36 @@ function family(tag, alreadyRead) {
   return set;
 }
 
+//     ancestry('major')   // {'major': true, 'critical': true}
+//
+// Return a list of parents and their own ancestry.
+function ancestry(tag, alreadyRead) {
+  var set = alreadyRead || Object.create(null);
+  set[tag] = true;
+  if (log.parents[tag] !== undefined) {
+    for (var i = 0; i < log.parents[tag].length; i++) {
+      // if that parent hasn't already been visited…
+      if (!set[log.parents[tag][i]]) {
+        ancestry(log.parents[tag][i], set);
+      }
+    }
+  }
+  return set;
+}
+
 //     log.pipe('critical', 'major');
 //
 // …should be read "pipe all critical statements to major".
 log.pipe = function (parentTag, tag) {
-  log.children[parentTag] = log.children[parentTag] || [];
-  log.children[parentTag].push(tag);
+  if (tag instanceof stream.Writable || tag instanceof stream.Duplex) {
+    logOutput[parentTag] = tag;
+  } else {
+    // It is a normal tag.
+    log.parents[tag] = log.parents[tag] || [];
+    log.parents[tag].push(parentTag);
+    log.children[parentTag] = log.children[parentTag] || [];
+    log.children[parentTag].push(tag);
+  }
 };
 
 // Print a single statement on several tags.
@@ -154,8 +179,8 @@ log.tags = function (statement, tagList, alreadyPrinted) {
   var alreadyPrinted = {};
 
   for (var i = 0; i < tagList.length; i++) {
-    if (logOutput[tagList[i]] && alreadyPrinted[tagList[i]] === undefined) {
-      log.write(tagList[i], statement, alreadyPrinted);
+    if (alreadyPrinted[tagList[i]] === undefined) {
+      log(statement, tagList[i], alreadyPrinted);
     }
   }
 };

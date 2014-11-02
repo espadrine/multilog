@@ -11,32 +11,36 @@ child tag are printed to the parent tag's writable stream!
 
 ## API
 
-```javascript
+```js
 var log = require('multilog');
+log('Curse your sudden but inevitable betrayal!', 'stderr');
 ```
 
 You get the following functions:
 
 - `log(statement, tag)` function prints `statement` in `tag` channel
   (defaulting to the special "stdout" channel).
-- `log.read(tag)` returns a string of all logs in that tag.
 - `log.pipe(parentTag, tag)` makes all `parentTag` statements be on the `tag`
   channel.
+
+By default, pipes flow into void.
+
+You can connect them to [a writable stream][Stream]
+with `log.pipe(tag, process.stdout)`.
+
+You can also ask that their logs be retained with `log.retain(tag)`.
+You can then read from them (and from all tags that feeds to them)
+through `log.read(tag)`, and flush the memory with `log.flush(tag)`.
 
 Advanced use:
 
 - `log.tags(statement, tagList)` prints `statement` on multiple tags.
-- `log.flush(tag)` clears all data stored in `tag` and its children.
-- `log.leafTags()` gives a list of all non-piped (fundamental) buffered tags.
-- `log.stream(tag)` returns a Stream for a fundamental buffered tag.
+- `log.stream(tag)` returns a duplex [Stream][] for a retained tag.
 
 There are two special tags, `stdout` and `stderr`, which directly flush their
-statements to the corresponding pipeline. All other tags are readable:
+statements to the corresponding pipeline.
 
-```javascript
-log('myTag', 'I have something to say');
-log.read('myTag');  // 'I have something to say\n'
-```
+[Stream]: http://nodejs.org/api/stream.html
 
 
 ## Authorship

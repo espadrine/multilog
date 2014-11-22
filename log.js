@@ -178,9 +178,15 @@ log.unpipe = function (parentTag, tag) {
   } else {
     // It is a normal tag.
     log.parents[tag] = log.parents[tag] || [];
-    log.parents[tag].splice(log.parents[tag].indexOf(parentTag), 1);
+    var parentIndex = log.parents[tag].indexOf(parentTag);
+    if (parentIndex >= 0) {
+      log.parents[tag].splice(parentIndex, 1);
+    }
     log.children[parentTag] = log.children[parentTag] || [];
-    log.children[parentTag].splice(log.children[parentTag].indexOf(tag), 1);
+    var childIndex = log.children[parentTag].indexOf(tag);
+    if (childIndex >= 0) {
+      log.children[parentTag].splice(childIndex, 1);
+    }
   }
 };
 

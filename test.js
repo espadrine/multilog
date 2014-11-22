@@ -34,3 +34,10 @@ log.unpipe('bug', 'assert');
 log(unpipeMsg, 'bug');
 assert.equal(log.read('assert'), '',
     "unpipe should avoid logs flowing through");
+
+log.unpipe('bug', process.stdout);
+var unpipeMsg = "This should not land in stdout";
+log.unpipe('bug', 'assert');
+log(unpipeMsg, 'bug');
+assert.equal(log.read('assert'), '',
+    "unpipe should avoid logs flowing through once.");

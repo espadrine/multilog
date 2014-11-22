@@ -28,3 +28,9 @@ assert.equal(log.read('assert'), nl([bugMsg, checkpointMsg]),
 log.flush('assert');
 assert.equal(log.read('assert'), '', "Bug did not flush");
 assert.equal(log.read('checkpoint'), '', "Bug did not flush parent");
+
+var unpipeMsg = "This should not be in assert";
+log.unpipe('bug', 'assert');
+log(unpipeMsg, 'bug');
+assert.equal(log.read('assert'), '',
+    "unpipe should avoid logs flowing through");

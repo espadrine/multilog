@@ -172,6 +172,18 @@ log.pipe = function (parentTag, tag) {
   }
 };
 
+log.unpipe = function (parentTag, tag) {
+  if (tag instanceof stream.Writable || tag instanceof stream.Duplex) {
+    delete logOutput[parentTag];
+  } else {
+    // It is a normal tag.
+    log.parents[tag] = log.parents[tag] || [];
+    log.parents[tag].splice(log.parents[tag].indexOf(parentTag), 1);
+    log.children[parentTag] = log.children[parentTag] || [];
+    log.children[parentTag].splice(log.children[parentTag].indexOf(tag), 1);
+  }
+};
+
 // Print a single statement on several tags.
 log.tags = function (statement, tagList, alreadyPrinted) {
 

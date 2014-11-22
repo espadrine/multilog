@@ -22,6 +22,7 @@ You get the following functions:
   (defaulting to the special "stdout" channel).
 - `log.pipe(parentTag, tag)` makes all `parentTag` statements be on the `tag`
   channel.
+- `log.unpipe(parentTag, tag)` undoes the corresponding `pipe` operation.
 
 By default, pipes flow into void.
 
